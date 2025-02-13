@@ -7,12 +7,23 @@ std::string StockModel::getTicker() const { return stock_data.ticker; }
 
 // ======== Bond Model ======== //
 BondModel::BondModel(const BondData& data) : bond_data(data) {}
-double BondModel::calculate() const { return bond_data.bond_value; }
+double BondModel::getBondValue() const {
+    return bond_data.bond_value;
+}
+double BondModel::calculate() const {
+    return getBondValue();
+}
 std::string BondModel::getTicker() const { return bond_data.ticker; }
 
 // ======== Convertible Bond Model ======== //
 ConvertibleBondModel::ConvertibleBondModel(const ConvertibleBondData& data) : cb_data(data) {}
+double ConvertibleBondModel::getBondValue() const {
+    return cb_data.bond_value;
+}
+double ConvertibleBondModel::getConversionRatio() const {
+    return cb_data.conversion_ratio;
+}
 double ConvertibleBondModel::calculate() const {
-    return cb_data.bond_value * cb_data.conversion_ratio;
+    return getBondValue() * getConversionRatio();
 }
 std::string ConvertibleBondModel::getTicker() const { return cb_data.ticker; } 
