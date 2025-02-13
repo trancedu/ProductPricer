@@ -17,7 +17,7 @@ public:
 class StockPricer : public BasePricer {
 public:
     std::string getName() const override;
-    double price(const StockModel& model, const StockData& data) const;
+    virtual double price(const StockModel& model, const StockData& data) const;
 };
 
 class BondPricer : public BondPricerBase {
