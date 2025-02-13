@@ -2,6 +2,7 @@
 #include <iostream>
 #include "data.h"
 #include "pricers.h"
+#include "models.h"
 
 struct PricerVisitor {
     const StockPricer& stock_pricer;

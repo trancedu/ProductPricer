@@ -5,16 +5,16 @@ double BondPricerBase::calculateBaseBondValue(double bond_value) const {
 }
 
 std::string StockPricer::getName() const { return "Stock Pricer"; }
-double StockPricer::price(const StockData* stockData) const {
-    return stockData->stock_value * 1.1;
+double StockPricer::price(const StockModel& model) const {
+    return model.calculate() * 1.1;
 }
 
 std::string BondPricer::getName() const { return "Bond Pricer"; }
-double BondPricer::price(const BondData* bondData) const {
-    return calculateBaseBondValue(bondData->bond_value);
+double BondPricer::price(const BondModel& model) const {
+    return calculateBaseBondValue(model.calculate());
 }
 
 std::string ConvertibleBondPricer::getName() const { return "Convertible Bond Pricer"; }
-double ConvertibleBondPricer::price(const ConvertibleBondData* cbData) const {
-    return calculateBaseBondValue(cbData->bond_value) * 0.95 * cbData->conversion_ratio;
+double ConvertibleBondPricer::price(const ConvertibleBondModel& model) const {
+    return calculateBaseBondValue(model.calculate()) * 0.95;
 } 

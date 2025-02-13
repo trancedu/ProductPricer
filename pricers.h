@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "data.h"
+#include "models.h"
 
 class BasePricer {
 public:
@@ -16,17 +17,17 @@ public:
 class StockPricer : public BasePricer {
 public:
     std::string getName() const override;
-    double price(const StockData* stockData) const;
+    double price(const StockModel& model) const;
 };
 
 class BondPricer : public BondPricerBase {
 public:
     std::string getName() const override;
-    double price(const BondData* bondData) const;
+    double price(const BondModel& model) const;
 };
 
 class ConvertibleBondPricer : public BondPricerBase {
 public:
     std::string getName() const override;
-    double price(const ConvertibleBondData* cbData) const;
+    double price(const ConvertibleBondModel& model) const;
 }; 
