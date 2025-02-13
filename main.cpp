@@ -51,6 +51,14 @@ public:
     virtual std::string getName() const = 0;
 };
 
+// ======== Base BondPricer ======== //
+class BondPricerBase : public BasePricer {
+public:
+    virtual double calculateBaseBondValue(double bond_value) const {
+        return bond_value * 0.9;  // Shared base calculation
+    }
+};
+
 // ======== StockPricer ======== //
 class StockPricer : public BasePricer {
 public:
@@ -63,28 +71,27 @@ public:
     }
 };
 
-// ======== BondPricer ======== //
-class BondPricer : public BasePricer {
+// ======== Regular BondPricer ======== //
+class BondPricer : public BondPricerBase {
 public:
     std::string getName() const override {
         return "Bond Pricer";
     }
 
     double price(const BondData* bondData) const {
-        return bondData->bond_value * 0.9;  // Example pricing formula
+        return calculateBaseBondValue(bondData->bond_value);
     }
 };
 
-// ======== Updated ConvertibleBondPricer ======== //
-class ConvertibleBondPricer : public BasePricer {
+// ======== ConvertibleBondPricer (Now shares base logic) ======== //
+class ConvertibleBondPricer : public BondPricerBase {
 public:
     std::string getName() const override {
         return "Convertible Bond Pricer";
     }
 
     double price(const ConvertibleBondData* cbData) const {
-        // Can still access bond_value through inheritance
-        return cbData->bond_value * 0.95 * cbData->conversion_ratio;
+        return calculateBaseBondValue(cbData->bond_value) * 0.95 * cbData->conversion_ratio;
     }
 };
 
