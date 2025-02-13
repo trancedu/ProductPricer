@@ -33,16 +33,15 @@ public:
         : BaseData(std::move(ticker), market_cap), bond_value(value) {}
 };
 
-// ======== ConvertibleBondData ======== //
-class ConvertibleBondData : public BaseData {
+// ======== ConvertibleBondData (Now inherits from BondData) ======== //
+class ConvertibleBondData : public BondData {
 public:
     double conversion_ratio;
-    double bond_value;
 
     ConvertibleBondData(std::string ticker, double market_cap, 
                        double value, double ratio)
-        : BaseData(std::move(ticker), market_cap), 
-          bond_value(value), conversion_ratio(ratio) {}
+        : BondData(std::move(ticker), market_cap, value),  // Now using BondData ctor
+          conversion_ratio(ratio) {}
 };
 
 // ======== Base Pricer Class ======== //
@@ -76,7 +75,7 @@ public:
     }
 };
 
-// ======== ConvertibleBondPricer ======== //
+// ======== Updated ConvertibleBondPricer ======== //
 class ConvertibleBondPricer : public BasePricer {
 public:
     std::string getName() const override {
@@ -84,6 +83,7 @@ public:
     }
 
     double price(const ConvertibleBondData* cbData) const {
+        // Can still access bond_value through inheritance
         return cbData->bond_value * 0.95 * cbData->conversion_ratio;
     }
 };
