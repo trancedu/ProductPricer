@@ -17,17 +17,17 @@ public:
 class StockPricer : public BasePricer {
 public:
     std::string getName() const override;
-    double price(const StockModel& model) const;
+    double price(const StockModel& model, const StockData& data) const;
 };
 
 class BondPricer : public BondPricerBase {
 public:
     std::string getName() const override;
-    double price(const BondModel& model) const;
+    double price(const BondModel& model, const BondData& data) const;
 };
 
 class ConvertibleBondPricer : public BondPricerBase {
 public:
     std::string getName() const override;
-    double price(const ConvertibleBondModel& model) const;
+    double price(const ConvertibleBondModel& model, const ConvertibleBondData& data) const;
 }; 
