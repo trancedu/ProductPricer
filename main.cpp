@@ -33,6 +33,18 @@ public:
         : BaseData(std::move(ticker), market_cap), bond_value(value) {}
 };
 
+// ======== ConvertibleBondData ======== //
+class ConvertibleBondData : public BaseData {
+public:
+    double conversion_ratio;
+    double bond_value;
+
+    ConvertibleBondData(std::string ticker, double market_cap, 
+                       double value, double ratio)
+        : BaseData(std::move(ticker), market_cap), 
+          bond_value(value), conversion_ratio(ratio) {}
+};
+
 // ======== Base Pricer Class ======== //
 class BasePricer {
 public:
@@ -64,15 +76,28 @@ public:
     }
 };
 
+// ======== ConvertibleBondPricer ======== //
+class ConvertibleBondPricer : public BasePricer {
+public:
+    std::string getName() const override {
+        return "Convertible Bond Pricer";
+    }
+
+    double price(const ConvertibleBondData* cbData) const {
+        return cbData->bond_value * 0.95 * cbData->conversion_ratio;
+    }
+};
+
 // ======== Variant-Based Pricing Mechanism ======== //
-// Use std::variant to hold StockData or BondData
-using InstrumentVariant = std::variant<StockData, BondData>;
+// Use std::variant to hold StockData, BondData, or ConvertibleBondData
+using InstrumentVariant = std::variant<StockData, BondData, ConvertibleBondData>;
 
 // ======== Pricer Visitor ======== //
 struct PricerVisitor {
     // Store pricers by reference (ensure they outlive this visitor)
     const StockPricer& stock_pricer;
     const BondPricer& bond_pricer;
+    const ConvertibleBondPricer& cb_pricer;
 
     void operator()(const StockData& data) const {
         std::cout << stock_pricer.getName() << " pricing " << data.ticker
@@ -83,22 +108,27 @@ struct PricerVisitor {
         std::cout << bond_pricer.getName() << " pricing " << data.ticker
                   << ": " << bond_pricer.price(&data) << "\n";
     }
+
+    void operator()(const ConvertibleBondData& data) const {
+        std::cout << cb_pricer.getName() << " pricing " << data.ticker
+                  << ": " << cb_pricer.price(&data) << "\n";
+    }
 };
 
 int main() {
-    // Create stock and bond data
+    // Create financial instruments
     StockData stock("AAPL", 1500.0, 100.0);
     BondData bond("US10Y", 5000.0, 200.0);
+    ConvertibleBondData cbond("CB123", 3000.0, 150.0, 1.2);
 
     // Create pricers
     StockPricer stockPricer;
     BondPricer bondPricer;
+    ConvertibleBondPricer cbPricer;
 
-    // Store financial instruments in a vector
-    std::vector<InstrumentVariant> instruments = {stock, bond};
+    std::vector<InstrumentVariant> instruments = {stock, bond, cbond};
 
-    // Process pricing using visitor pattern
-    const PricerVisitor visitor{stockPricer, bondPricer};
+    const PricerVisitor visitor{stockPricer, bondPricer, cbPricer};
     for (const auto& instrument : instruments) {
         std::visit(visitor, instrument);
     }
