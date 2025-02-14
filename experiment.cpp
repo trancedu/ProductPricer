@@ -21,12 +21,12 @@ public:
 };
 
 // Derived Bond Types
-class CallableBond : public BondData {
+class CallableBondData : public BondData {
 public:
     double callable_premium = 5.0;
 };
 
-class ConvertibleBond : public BondData {
+class ConvertibleBondData : public BondData {
 public:
     double conversion_ratio = 1.5;
 };
@@ -68,18 +68,18 @@ public:
 };
 
 // ---------------------- CALLABLE BOND PRICER ----------------------
-class CallableBondPricer : public BondPricer<CallableBondPricer, CallableBond> {
+class CallableBondPricer : public BondPricer<CallableBondPricer, CallableBondData> {
 public:
-    double calculatePriceImpl(CallableBond* bond) {
+    double calculatePriceImpl(CallableBondData* bond) {
         double base_price = bond->bond_specific_value * 1.05;  // Common bond pricing logic
         return base_price + bond->callable_premium + commonBondFunction(bond);
     }
 };
 
 // ---------------------- CONVERTIBLE BOND PRICER ----------------------
-class ConvertibleBondPricer : public BondPricer<ConvertibleBondPricer, ConvertibleBond> {
+class ConvertibleBondPricer : public BondPricer<ConvertibleBondPricer, ConvertibleBondData> {
 public:
-    double calculatePriceImpl(ConvertibleBond* bond) {
+    double calculatePriceImpl(ConvertibleBondData* bond) {
         double base_price = bond->bond_specific_value * 1.05;  // Common bond pricing logic
         return base_price + bond->conversion_ratio * 100 + commonBondFunction(bond);
     }
@@ -88,8 +88,8 @@ public:
 // ---------------------- VARIANT TYPE DEFINITION ----------------------
 using ProductVariant = std::variant<
     StockData*,
-    CallableBond*,
-    ConvertibleBond*
+    CallableBondData*,
+    ConvertibleBondData*
 >;
 
 // ---------------------- PRICER VISITOR ----------------------
@@ -102,8 +102,8 @@ public:
 
     // Handle StockData with different pricer options
     double operator()(StockData* data) { return stockPricer.calculatePrice(data); }
-    double operator()(CallableBond* data) { return callablePricer.calculatePrice(data); }
-    double operator()(ConvertibleBond* data) { return convertiblePricer.calculatePrice(data); }
+    double operator()(CallableBondData* data) { return callablePricer.calculatePrice(data); }
+    double operator()(ConvertibleBondData* data) { return convertiblePricer.calculatePrice(data); }
     
     // Additional method for junk stock pricing
     double calculateJunkPrice(StockData* data) { return junkStockPricer.calculatePrice(data); }
@@ -112,8 +112,8 @@ public:
 // ---------------------- UPDATED USAGE ----------------------
 int main() {
     StockData stock;
-    CallableBond callableBond;
-    ConvertibleBond convertibleBond;
+    CallableBondData callableBond;
+    ConvertibleBondData convertibleBond;
 
     // Create product variants
     std::vector<ProductVariant> products = {
