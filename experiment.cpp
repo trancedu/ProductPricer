@@ -1,4 +1,6 @@
 #include <iostream>
+#include <variant>
+#include <vector>
 
 // Base Data class
 class Data {
@@ -83,21 +85,52 @@ public:
     }
 };
 
-// ---------------------- USAGE ----------------------
+// ---------------------- VARIANT TYPE DEFINITION ----------------------
+using ProductVariant = std::variant<
+    StockData*,
+    CallableBond*,
+    ConvertibleBond*
+>;
+
+// ---------------------- PRICER VISITOR ----------------------
+class PricerVisitor {
+public:
+    StockPricer stockPricer;
+    CallableBondPricer callablePricer;
+    ConvertibleBondPricer convertiblePricer;
+    JunkStockPricer junkStockPricer;
+
+    // Handle StockData with different pricer options
+    double operator()(StockData* data) { return stockPricer.calculatePrice(data); }
+    double operator()(CallableBond* data) { return callablePricer.calculatePrice(data); }
+    double operator()(ConvertibleBond* data) { return convertiblePricer.calculatePrice(data); }
+    
+    // Additional method for junk stock pricing
+    double calculateJunkPrice(StockData* data) { return junkStockPricer.calculatePrice(data); }
+};
+
+// ---------------------- UPDATED USAGE ----------------------
 int main() {
     StockData stock;
     CallableBond callableBond;
     ConvertibleBond convertibleBond;
 
-    StockPricer stockPricer;
-    JunkStockPricer junkStockPricer;
-    CallableBondPricer callablePricer;
-    ConvertibleBondPricer convertiblePricer;
+    // Create product variants
+    std::vector<ProductVariant> products = {
+        &stock,
+        &callableBond,
+        &convertibleBond
+    };
 
-    std::cout << "Stock Price: " << stockPricer.calculatePrice(&stock) << std::endl;
-    std::cout << "Junk Stock Price: " << junkStockPricer.calculatePrice(&stock) << std::endl;
-    std::cout << "Callable Bond Price: " << callablePricer.calculatePrice(&callableBond) << std::endl;
-    std::cout << "Convertible Bond Price: " << convertiblePricer.calculatePrice(&convertibleBond) << std::endl;
+    PricerVisitor visitor;
+
+    // Process all products using visitor pattern
+    std::cout << "Stock Price: " << std::visit(visitor, products[0]) << std::endl;
+    std::cout << "Callable Bond Price: " << std::visit(visitor, products[1]) << std::endl;
+    std::cout << "Convertible Bond Price: " << std::visit(visitor, products[2]) << std::endl;
+    
+    // Handle junk stock pricing separately
+    std::cout << "Junk Stock Price: " << visitor.calculateJunkPrice(&stock) << std::endl;
 
     return 0;
 }
