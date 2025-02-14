@@ -1,4 +1,6 @@
 #include <iostream>
+#include <variant>
+#include <vector>
 
 // Base Data class
 class Data {
@@ -29,75 +31,142 @@ public:
     double conversion_ratio = 1.5;
 };
 
-// ---------------------- BASE PRICER CLASS ----------------------
-// General template for all pricers
+// ====================== PRICER INTERFACES ======================
+class StockPricerInterface {
+public:
+    virtual double calculatePrice(const StockData* data) const = 0;
+    virtual ~StockPricerInterface() = default;
+};
+
+class CallableBondPricerInterface {
+public:
+    virtual double calculatePrice(const CallableBond* data) const = 0;
+    virtual ~CallableBondPricerInterface() = default;
+};
+
+class ConvertibleBondPricerInterface {
+public:
+    virtual double calculatePrice(const ConvertibleBond* data) const = 0;
+    virtual ~ConvertibleBondPricerInterface() = default;
+};
+
+// ====================== UPDATED PRICERS ======================
 template <typename Derived, typename DataType>
 class Pricer {
 public:
-    double calculatePrice(DataType* data) {
-        return static_cast<Derived*>(this)->calculatePriceImpl(data);
+    double calculatePrice(const DataType* data) const {
+        return static_cast<const Derived*>(this)->calculatePriceImpl(data);
     }
 };
 
-// ---------------------- STOCK PRICER ----------------------
-// Specialization for stock pricing
-class StockPricer : public Pricer<StockPricer, StockData> {
+class StockPricer : public Pricer<StockPricer, StockData>, public StockPricerInterface {
 public:
-    double calculatePriceImpl(StockData* data) {
-        return data->stock_specific_value * 1.1;  // Example stock pricing logic
+    double calculatePriceImpl(const StockData* data) const {
+        return data->stock_specific_value * 1.1;
+    }
+    
+    double calculatePrice(const StockData* data) const override {
+        return Pricer<StockPricer, StockData>::calculatePrice(data);
     }
 };
 
-class JunkStockPricer : public Pricer<JunkStockPricer, StockData> {
+class JunkStockPricer : public Pricer<JunkStockPricer, StockData>, public StockPricerInterface {
 public:
-    double calculatePriceImpl(StockData* data) {
-        return data->stock_specific_value * 0.5;  // Junk stock pricing logic
+    double calculatePriceImpl(const StockData* data) const {
+        return data->stock_specific_value * 0.5;
+    }
+    
+    double calculatePrice(const StockData* data) const override {
+        return Pricer<JunkStockPricer, StockData>::calculatePrice(data);
     }
 };
 
 // ---------------------- BOND PRICER (INTERMEDIATE CLASS) ----------------------
-// Provides shared bond pricing logic
 template <typename Derived, typename BondType>
 class BondPricer : public Pricer<Derived, BondType> {
 public:
-    double commonBondFunction(BondType* bond) {
-        return bond->bond_specific_value * 0.02; // Common bond adjustment logic
+    double commonBondFunction(BondType* bond) const {
+        return bond->bond_specific_value * 0.02;
     }
 };
 
 // ---------------------- CALLABLE BOND PRICER ----------------------
-class CallableBondPricer : public BondPricer<CallableBondPricer, CallableBond> {
+class CallableBondPricer : public BondPricer<CallableBondPricer, CallableBond>, 
+                          public CallableBondPricerInterface {
 public:
-    double calculatePriceImpl(CallableBond* bond) {
-        double base_price = bond->bond_specific_value * 1.05;  // Common bond pricing logic
-        return base_price + bond->callable_premium + commonBondFunction(bond);
+    double calculatePriceImpl(const CallableBond* bond) const {
+        double base_price = bond->bond_specific_value * 1.05;
+        return base_price + bond->callable_premium + commonBondFunction(const_cast<CallableBond*>(bond));
+    }
+    
+    double calculatePrice(const CallableBond* data) const override {
+        return Pricer<CallableBondPricer, CallableBond>::calculatePrice(data);
     }
 };
 
 // ---------------------- CONVERTIBLE BOND PRICER ----------------------
-class ConvertibleBondPricer : public BondPricer<ConvertibleBondPricer, ConvertibleBond> {
+class ConvertibleBondPricer : public BondPricer<ConvertibleBondPricer, ConvertibleBond>, 
+                             public ConvertibleBondPricerInterface {
 public:
-    double calculatePriceImpl(ConvertibleBond* bond) {
-        double base_price = bond->bond_specific_value * 1.05;  // Common bond pricing logic
-        return base_price + bond->conversion_ratio * 100 + commonBondFunction(bond);
+    double calculatePriceImpl(const ConvertibleBond* bond) const {
+        double base_price = bond->bond_specific_value * 1.05;
+        return base_price + bond->conversion_ratio * 100 + commonBondFunction(const_cast<ConvertibleBond*>(bond));
+    }
+    
+    double calculatePrice(const ConvertibleBond* data) const override {
+        return Pricer<ConvertibleBondPricer, ConvertibleBond>::calculatePrice(data);
     }
 };
 
-// ---------------------- USAGE ----------------------
+// ====================== VISITOR ======================
+using InstrumentVariant = std::variant<StockData, CallableBond, ConvertibleBond>;
+
+struct PricingVisitor {
+    const StockPricerInterface* stock_pricer;
+    const CallableBondPricerInterface* callable_pricer;
+    const ConvertibleBondPricerInterface* convertible_pricer;
+    
+    void operator()(const StockData& data) const {
+        std::cout << "Stock Price: " << stock_pricer->calculatePrice(&data) << std::endl;
+    }
+    
+    void operator()(const CallableBond& data) const {
+        std::cout << "Callable Bond Price: " << callable_pricer->calculatePrice(&data) << std::endl;
+    }
+    
+    void operator()(const ConvertibleBond& data) const {
+        std::cout << "Convertible Bond Price: " << convertible_pricer->calculatePrice(&data) << std::endl;
+    }
+};
+
+// ====================== UPDATED USAGE ======================
 int main() {
     StockData stock;
     CallableBond callableBond;
     ConvertibleBond convertibleBond;
 
+    // Create pricers
     StockPricer stockPricer;
-    JunkStockPricer junkStockPricer;
+    JunkStockPricer junkPricer;
     CallableBondPricer callablePricer;
     ConvertibleBondPricer convertiblePricer;
 
-    std::cout << "Stock Price: " << stockPricer.calculatePrice(&stock) << std::endl;
-    std::cout << "Junk Stock Price: " << junkStockPricer.calculatePrice(&stock) << std::endl;
-    std::cout << "Callable Bond Price: " << callablePricer.calculatePrice(&callableBond) << std::endl;
-    std::cout << "Convertible Bond Price: " << convertiblePricer.calculatePrice(&convertibleBond) << std::endl;
+    // Create instrument collection
+    std::vector<InstrumentVariant> instruments = {stock, callableBond, convertibleBond};
+
+    // Create visitor with different pricing strategies
+    PricingVisitor defaultVisitor{&stockPricer, &callablePricer, &convertiblePricer};
+    PricingVisitor junkStockVisitor{&junkPricer, &callablePricer, &convertiblePricer};
+
+    std::cout << "=== Default Pricing ===" << std::endl;
+    for (const auto& instrument : instruments) {
+        std::visit(defaultVisitor, instrument);
+    }
+
+    std::cout << "\n=== Junk Stock Pricing ===" << std::endl;
+    for (const auto& instrument : instruments) {
+        std::visit(junkStockVisitor, instrument);
+    }
 
     return 0;
 }
