@@ -9,4 +9,5 @@ add_executable(financial_pricing
     pricers.cpp
     visitor.cpp
     models.cpp
+    model_factory.cpp
 ) 

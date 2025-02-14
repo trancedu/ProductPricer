@@ -1,21 +1,6 @@
 #include "visitor.h"
+#include "model_factory.h"
 #include <vector>
-
-// Concrete model factory implementation
-class DefaultModelFactory : public ModelFactory {
-public:
-    StockModel createStockModel(const StockData& data) const override {
-        return StockModel(data);
-    }
-    
-    BondModel createBondModel(const BondData& data) const override {
-        return BondModel(data);
-    }
-    
-    ConvertibleBondModel createCBModel(const ConvertibleBondData& data) const override {
-        return ConvertibleBondModel(data);
-    }
-};
 
 int main() {
     // Create data
@@ -29,6 +14,7 @@ int main() {
     ConvertibleBondPricer defaultCBPricer;
     
     DefaultModelFactory defaultModelFactory;
+    AggressiveModelFactory aggressiveModels;
 
     // Create visitor with initial configuration
     PricerVisitor visitor;
@@ -54,24 +40,8 @@ int main() {
         }
     };
 
-    class AggressiveModelFactory : public ModelFactory {
-    public:
-        StockModel createStockModel(const StockData& data) const override {
-            return StockModel(data);
-        }
-        
-        BondModel createBondModel(const BondData& data) const override {
-            return BondModel(data);
-        }
-        
-        ConvertibleBondModel createCBModel(const ConvertibleBondData& data) const override {
-            return ConvertibleBondModel(data);
-        }
-    };
-
     // Switch to new configuration
     DiscountedStockPricer discountedPricer;
-    AggressiveModelFactory aggressiveModels;
     
     std::cout << "\n=== Modified Pricing ===" << std::endl;
     visitor.setStockPricer(&discountedPricer);

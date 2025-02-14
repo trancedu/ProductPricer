@@ -3,9 +3,7 @@
 #include "data.h"
 #include "pricers.h"
 #include "models.h"
-
-// Forward declarations
-class ModelFactory;
+#include "model_factory.h"
 
 struct PricerVisitor {
     // Change to pointers for dynamic switching
@@ -23,13 +21,4 @@ struct PricerVisitor {
     void operator()(const StockData& data) const;
     void operator()(const BondData& data) const;
     void operator()(const ConvertibleBondData& data) const;
-};
-
-// ======== Model Factory Interface ======== //
-class ModelFactory {
-public:
-    virtual ~ModelFactory() = default;
-    virtual StockModel createStockModel(const StockData& data) const = 0;
-    virtual BondModel createBondModel(const BondData& data) const = 0;
-    virtual ConvertibleBondModel createCBModel(const ConvertibleBondData& data) const = 0;
 }; 
