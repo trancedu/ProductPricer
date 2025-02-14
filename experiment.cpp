@@ -85,9 +85,19 @@ public:
     }
 };
 
+// ---------------------- VANILLA BOND PRICER ----------------------
+class VanillaBondPricer : public BondPricer<VanillaBondPricer, BondData> {
+public:
+    double calculatePriceImpl(BondData* bond) {
+        double base_price = bond->bond_specific_value * 1.03;  // Different base multiplier
+        return base_price + commonBondFunction(bond);
+    }
+};
+
 // ---------------------- VARIANT TYPE DEFINITION ----------------------
 using ProductVariant = std::variant<
     StockData*,
+    BondData*,  // Add base BondData to variant
     CallableBond*,
     ConvertibleBond*
 >;
@@ -96,28 +106,31 @@ using ProductVariant = std::variant<
 class PricerVisitor {
 public:
     StockPricer stockPricer;
+    VanillaBondPricer vanillaBondPricer;  // Add vanilla bond pricer
     CallableBondPricer callablePricer;
     ConvertibleBondPricer convertiblePricer;
     JunkStockPricer junkStockPricer;
 
-    // Handle StockData with different pricer options
+    // Add handler for base BondData
     double operator()(StockData* data) { return stockPricer.calculatePrice(data); }
+    double operator()(BondData* data) { return vanillaBondPricer.calculatePrice(data); }
     double operator()(CallableBond* data) { return callablePricer.calculatePrice(data); }
     double operator()(ConvertibleBond* data) { return convertiblePricer.calculatePrice(data); }
     
-    // Additional method for junk stock pricing
     double calculateJunkPrice(StockData* data) { return junkStockPricer.calculatePrice(data); }
 };
 
 // ---------------------- UPDATED USAGE ----------------------
 int main() {
     StockData stock;
+    BondData vanillaBond;  // Base bond instance
     CallableBond callableBond;
     ConvertibleBond convertibleBond;
 
     // Create product variants
     std::vector<ProductVariant> products = {
         &stock,
+        &vanillaBond,  // Add base bond to products
         &callableBond,
         &convertibleBond
     };
