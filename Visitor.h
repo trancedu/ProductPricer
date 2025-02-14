@@ -23,3 +23,14 @@ public:
     std::string operator()(CallableBondData* data) { return data->typeName; }
     std::string operator()(ConvertibleBondData* data) { return data->typeName; }
 }; 
+
+class PricerNameVisitor {
+private:
+    PricerVisitor& visitor;
+public:
+    PricerNameVisitor(PricerVisitor& v) : visitor(v) {}
+    
+    std::string operator()(StockData* data) { return visitor.stockPricer.getName(); }
+    std::string operator()(CallableBondData* data) { return visitor.callablePricer.getName(); }
+    std::string operator()(ConvertibleBondData* data) { return visitor.convertiblePricer.getName(); }
+};
