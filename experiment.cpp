@@ -48,6 +48,13 @@ public:
     }
 };
 
+class JunkStockPricer : public Pricer<JunkStockPricer, StockData> {
+public:
+    double calculatePriceImpl(StockData* data) {
+        return data->stock_specific_value * 0.5;  // Junk stock pricing logic
+    }
+};
+
 // ---------------------- BOND PRICER (INTERMEDIATE CLASS) ----------------------
 // Provides shared bond pricing logic
 template <typename Derived, typename BondType>
@@ -83,10 +90,12 @@ int main() {
     ConvertibleBond convertibleBond;
 
     StockPricer stockPricer;
+    JunkStockPricer junkStockPricer;
     CallableBondPricer callablePricer;
     ConvertibleBondPricer convertiblePricer;
 
     std::cout << "Stock Price: " << stockPricer.calculatePrice(&stock) << std::endl;
+    std::cout << "Junk Stock Price: " << junkStockPricer.calculatePrice(&stock) << std::endl;
     std::cout << "Callable Bond Price: " << callablePricer.calculatePrice(&callableBond) << std::endl;
     std::cout << "Convertible Bond Price: " << convertiblePricer.calculatePrice(&convertibleBond) << std::endl;
 
