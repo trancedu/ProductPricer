@@ -41,19 +41,51 @@ public:
     }
 };
 
+// ---------------------- STOCK PRICER BASE ----------------------
+template <typename Derived>
+class StockPricerBase : public Pricer<Derived, StockData> {
+public:
+    double commonStockFunction(StockData* stock) {
+        return stock->stock_specific_value * 0.1; // Common adjustment
+    }
+    
+    // Add other common functions here
+};
+
 // ---------------------- STOCK PRICER ----------------------
-// Specialization for stock pricing
-class StockPricer : public Pricer<StockPricer, StockData> {
+class StockPricer : public StockPricerBase<StockPricer> {
 public:
     double calculatePriceImpl(StockData* data) {
-        return data->stock_specific_value * 1.1;  // Example stock pricing logic
+        // Now using common function from base
+        return data->stock_specific_value * 1.0 + commonStockFunction(data);
     }
 };
 
-class JunkStockPricer : public Pricer<JunkStockPricer, StockData> {
+// ---------------------- JUNK STOCK PRICER ----------------------
+class JunkStockPricer : public StockPricerBase<JunkStockPricer> {
 public:
     double calculatePriceImpl(StockData* data) {
-        return data->stock_specific_value * 0.5;  // Junk stock pricing logic
+        // Access common function + custom logic
+        return (data->stock_specific_value * 0.4) - commonStockFunction(data);
+    }
+};
+
+// To create a NEW stock pricer type:
+class MyCustomStockPricer : public Pricer<MyCustomStockPricer, StockData> {
+public:
+    // Must implement calculatePriceImpl
+    double calculatePriceImpl(StockData* data) {
+        // New pricing logic
+        return data->stock_specific_value * 0.8; 
+    }
+};
+
+// ---------------------- ENHANCED STOCK PRICER ----------------------
+class EnhancedStockPricer : public StockPricerBase<EnhancedStockPricer> {
+    StockPricer basePricer;
+public:
+    double calculatePriceImpl(StockData* data) {
+        return basePricer.calculatePrice(data) * 1.05 + commonStockFunction(data);
     }
 };
 
