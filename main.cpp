@@ -17,14 +17,25 @@ int main() {
     };
 
     PricerVisitor visitor;
+    TypeNameVisitor typeVisitor;
 
     // Process all products using visitor pattern
-    std::cout << "Stock Price: " << std::visit(visitor, products[0]) << std::endl;
-    std::cout << "Callable Bond Price: " << std::visit(visitor, products[1]) << std::endl;
-    std::cout << "Convertible Bond Price: " << std::visit(visitor, products[2]) << std::endl;
+    std::cout << " Data: " << std::visit(typeVisitor, products[0])
+              << " Pricer: " << visitor.stockPricer.getName() 
+              << " Stock Price: " << std::visit(visitor, products[0]) << std::endl;
+
+    std::cout << " Data: " << std::visit(typeVisitor, products[1])
+              << " Pricer: " << visitor.callablePricer.getName() 
+              << " Callable Bond Price: " << std::visit(visitor, products[1]) << std::endl;
+
+    std::cout << " Data: " << std::visit(typeVisitor, products[2])
+              << " Pricer: " << visitor.convertiblePricer.getName() 
+              << " Convertible Bond Price: " << std::visit(visitor, products[2]) << std::endl;
     
     // Handle junk stock pricing separately
-    std::cout << "Junk Stock Price: " << visitor.calculateJunkPrice(&stock) << std::endl;
+    std::cout << " Data: " << stock.typeName
+              << " Pricer: " << visitor.junkStockPricer.getName() 
+              << " Junk Stock Price: " << visitor.calculateJunkPrice(&stock) << std::endl;
 
     return 0;
 }

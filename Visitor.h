@@ -15,4 +15,11 @@ public:
     double operator()(ConvertibleBondData* data) { return convertiblePricer.calculatePrice(data); }
     
     double calculateJunkPrice(StockData* data) { return junkStockPricer.calculatePrice(data); }
+};
+
+class TypeNameVisitor {
+public:
+    std::string operator()(StockData* data) { return data->typeName; }
+    std::string operator()(CallableBondData* data) { return data->typeName; }
+    std::string operator()(ConvertibleBondData* data) { return data->typeName; }
 }; 
