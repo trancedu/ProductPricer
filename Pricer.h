@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <concepts>
 
 template <typename Derived, typename DataType>
 class Pricer {
@@ -10,3 +12,13 @@ public:
         return static_cast<Derived*>(this)->getName();
     }
 };
+
+template<typename T, typename DataType>
+concept PricerImpl = requires(T& t, DataType* data) {
+    { t.calculatePriceImpl(data) } -> std::convertible_to<double>;
+    { t.getName() } -> std::convertible_to<std::string>;
+};
+
+template <typename Derived, typename DataType>
+    requires PricerImpl<Derived, DataType>
+class Pricer<Derived, DataType>;
