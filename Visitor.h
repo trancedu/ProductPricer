@@ -2,7 +2,7 @@
 #include "StockPricer.h"
 #include "BondPricers.h"
 #include "ProductVariant.h"
-
+#include "Model.h"
 class PricerVisitor {
 public:
     StockPricer stockPricer;
@@ -15,6 +15,21 @@ public:
     double operator()(const ConvertibleBondData& data) { return convertiblePricer.calculatePrice(&data); }
     
     double calculateJunkPrice(const StockData& data) { return junkStockPricer.calculatePrice(&data); }
+};
+
+class PricerModelVisitor {
+public:
+    StockPricer stockPricer;
+    CallableBondPricer callablePricer;
+    ConvertibleBondPricer convertiblePricer;
+
+    StockModel stockModel;
+    CallableBondModel callableBondModel;
+    ConvertibleBondModel convertibleBondModel;
+
+    double operator()(const StockData& data) { return stockModel.value(data, stockPricer); }
+    double operator()(const CallableBondData& data) { return callableBondModel.value(data, callablePricer); }
+    double operator()(const ConvertibleBondData& data) { return convertibleBondModel.value(data, convertiblePricer); }
 };
 
 class TypeNameVisitor {

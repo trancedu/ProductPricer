@@ -2,6 +2,7 @@
 #include <vector>
 #include "Visitor.h"
 #include "ProductVariant.h"
+#include "Model.h"
 
 // ---------------------- UPDATED USAGE ----------------------
 int main() {
@@ -32,5 +33,12 @@ int main() {
               << " Pricer: " << visitor.junkStockPricer.getName() 
               << " Junk Stock Price: " << visitor.calculateJunkPrice(stock) << std::endl;
 
+    // ---------------------- UPDATED USAGE ----------------------
+    PricerModelVisitor modelVisitor;
+    for (const auto& product : products) {
+        std::cout << " Data: " << std::visit(typeVisitor, product)
+                  << " Model: " << std::visit(modelVisitor, product)
+                  << " Value: " << std::visit(modelVisitor, product) << std::endl;
+    }
     return 0;
 }
