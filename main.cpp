@@ -11,9 +11,9 @@ int main() {
 
     // Create product variants
     std::vector<ProductVariant> products = {
-        &stock,
-        &callableBond,
-        &convertibleBond
+        stock,
+        callableBond,
+        convertibleBond
     };
 
     PricerVisitor visitor;
@@ -30,7 +30,7 @@ int main() {
     // Handle junk stock pricing separately
     std::cout << " Data: " << stock.typeName
               << " Pricer: " << visitor.junkStockPricer.getName() 
-              << " Junk Stock Price: " << visitor.calculateJunkPrice(&stock) << std::endl;
+              << " Junk Stock Price: " << visitor.calculateJunkPrice(stock) << std::endl;
 
     return 0;
 }

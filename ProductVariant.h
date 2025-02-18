@@ -3,7 +3,7 @@
 #include "Data.h"
 
 using ProductVariant = std::variant<
-    StockData*,
-    CallableBondData*,
-    ConvertibleBondData*
+    StockData,
+    CallableBondData,
+    ConvertibleBondData
 >; 
