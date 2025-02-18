@@ -5,7 +5,7 @@
 class StockPricer : public Pricer {
 public:
     StockPricer() : Pricer("StockPricer") {}
-    double calculatePrice(const StockData* data) {
+    double calculatePrice(const StockData* data) const{
         return data->stock_specific_value * 1.1;
     }
 };
@@ -13,7 +13,7 @@ public:
 class JunkStockPricer : public Pricer {
 public:
     JunkStockPricer() : Pricer("JunkStockPricer") {}
-    double calculatePrice(const StockData* data) {
+    double calculatePrice(const StockData* data) const{
         return data->stock_specific_value * 0.5;
     }
 }; 
