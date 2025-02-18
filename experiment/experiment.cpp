@@ -5,7 +5,7 @@
 // Base Data class
 class Data {
 public:
-    virtual ~Data() = default;
+    double common_value = 10.0;
 };
 
 // Stock Data
