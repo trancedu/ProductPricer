@@ -10,18 +10,18 @@ public:
     ConvertibleBondPricer convertiblePricer;
     JunkStockPricer junkStockPricer;
 
-    double operator()(StockData* data) { return stockPricer.calculatePrice(data); }
-    double operator()(CallableBondData* data) { return callablePricer.calculatePrice(data); }
-    double operator()(ConvertibleBondData* data) { return convertiblePricer.calculatePrice(data); }
+    double operator()(const StockData& data) { return stockPricer.calculatePrice(data); }
+    double operator()(const CallableBondData& data) { return callablePricer.calculatePrice(data); }
+    double operator()(const ConvertibleBondData& data) { return convertiblePricer.calculatePrice(data); }
     
-    double calculateJunkPrice(StockData* data) { return junkStockPricer.calculatePrice(data); }
+    double calculateJunkPrice(const StockData& data) { return junkStockPricer.calculatePrice(data); }
 };
 
 class TypeNameVisitor {
 public:
-    std::string operator()(StockData* data) { return data->typeName; }
-    std::string operator()(CallableBondData* data) { return data->typeName; }
-    std::string operator()(ConvertibleBondData* data) { return data->typeName; }
+    std::string operator()(const StockData& data) { return data.typeName; }
+    std::string operator()(const CallableBondData& data) { return data.typeName; }
+    std::string operator()(const ConvertibleBondData& data) { return data.typeName; }
 }; 
 
 class PricerNameVisitor {
@@ -30,7 +30,7 @@ private:
 public:
     PricerNameVisitor(PricerVisitor& v) : visitor(v) {}
     
-    std::string operator()(StockData* data) { return visitor.stockPricer.getName(); }
-    std::string operator()(CallableBondData* data) { return visitor.callablePricer.getName(); }
-    std::string operator()(ConvertibleBondData* data) { return visitor.convertiblePricer.getName(); }
+    std::string operator()(const StockData&) { return visitor.stockPricer.getName(); }
+    std::string operator()(const CallableBondData&) { return visitor.callablePricer.getName(); }
+    std::string operator()(const ConvertibleBondData&) { return visitor.convertiblePricer.getName(); }
 };

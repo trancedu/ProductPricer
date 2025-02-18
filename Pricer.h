@@ -5,7 +5,7 @@
 template <typename Derived, typename DataType>
 class Pricer {
 public:
-    double calculatePrice(DataType* data) {
+    double calculatePrice(const DataType& data) {
         return static_cast<Derived*>(this)->calculatePriceImpl(data);
     }
     std::string getName() const {
@@ -14,7 +14,7 @@ public:
 };
 
 template<typename T, typename DataType>
-concept PricerImpl = requires(T& t, DataType* data) {
+concept PricerImpl = requires(T& t, const DataType& data) {
     { t.calculatePriceImpl(data) } -> std::convertible_to<double>;
     { t.getName() } -> std::convertible_to<std::string>;
 };
