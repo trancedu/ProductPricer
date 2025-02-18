@@ -2,23 +2,13 @@
 #include <string>
 #include <concepts>
 
-template <typename Derived, typename DataType>
+
 class Pricer {
 public:
-    double calculatePrice(DataType* data) {
-        return static_cast<Derived*>(this)->calculatePriceImpl(data);
-    }
     std::string getName() const {
-        return static_cast<Derived*>(this)->getName();
+        return name;
     }
+    explicit Pricer(std::string name) : name(std::move(name)) {}
+private:
+    std::string name;
 };
-
-template<typename T, typename DataType>
-concept PricerImpl = requires(T& t, DataType* data) {
-    { t.calculatePriceImpl(data) } -> std::convertible_to<double>;
-    { t.getName() } -> std::convertible_to<std::string>;
-};
-
-template <typename Derived, typename DataType>
-    requires PricerImpl<Derived, DataType>
-class Pricer<Derived, DataType>;
