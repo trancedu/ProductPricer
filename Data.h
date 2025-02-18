@@ -2,7 +2,6 @@
 
 class Data {
 public:
-    virtual ~Data() = default;
     std::string typeName;
 };
 
